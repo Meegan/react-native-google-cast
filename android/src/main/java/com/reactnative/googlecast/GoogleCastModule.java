@@ -22,6 +22,7 @@ import com.google.android.gms.cast.MediaInfo;
 import com.google.android.gms.cast.MediaMetadata;
 import com.google.android.gms.cast.framework.CastContext;
 import com.google.android.gms.cast.framework.CastSession;
+import com.google.android.gms.cast.framework.CastState;
 import com.google.android.gms.cast.framework.SessionManager;
 import com.google.android.gms.cast.framework.SessionManagerListener;
 import com.google.android.gms.cast.framework.media.RemoteMediaClient;
@@ -187,9 +188,13 @@ public class GoogleCastModule
     getReactApplicationContext().runOnUiQueueThread(new Runnable() {
       @Override
       public void run() {
-        CastContext castContext =
-            CastContext.getSharedInstance(getReactApplicationContext());
-        promise.resolve(castContext.getCastState() - 1);
+        try {
+          CastContext castContext =
+              CastContext.getSharedInstance(getReactApplicationContext());
+          promise.resolve(castContext.getCastState() - 1);
+        } catch (RuntimeException e) {
+          promise.resolve(CastState.NO_DEVICES_AVAILABLE - 1);
+        }
       }
     });
   }
@@ -299,11 +304,15 @@ public class GoogleCastModule
     getReactApplicationContext().runOnUiQueueThread(new Runnable() {
       @Override
       public void run() {
-        SessionManager sessionManager =
-            CastContext.getSharedInstance(getReactApplicationContext())
-                .getSessionManager();
-        sessionManager.endCurrentSession(stopCasting);
-        promise.resolve(true);
+        try {
+          SessionManager sessionManager =
+              CastContext.getSharedInstance(getReactApplicationContext())
+                  .getSessionManager();
+          sessionManager.endCurrentSession(stopCasting);
+          promise.resolve(true);
+        } catch (RuntimeException e) {
+          promise.resolve(false);
+        }
       }
     });
   }
@@ -326,11 +335,14 @@ public class GoogleCastModule
     getReactApplicationContext().runOnUiQueueThread(new Runnable() {
       @Override
       public void run() {
-        SessionManager sessionManager =
-            CastContext.getSharedInstance(getReactApplicationContext())
-                .getSessionManager();
-        sessionManager.addSessionManagerListener(mSessionManagerListener,
-            CastSession.class);
+        try {
+          SessionManager sessionManager =
+              CastContext.getSharedInstance(getReactApplicationContext())
+                  .getSessionManager();
+          sessionManager.addSessionManagerListener(mSessionManagerListener,
+              CastSession.class);
+        } catch (RuntimeException e) {
+        }
       }
     });
   }
@@ -340,11 +352,14 @@ public class GoogleCastModule
     getReactApplicationContext().runOnUiQueueThread(new Runnable() {
       @Override
       public void run() {
-        SessionManager sessionManager =
-            CastContext.getSharedInstance(getReactApplicationContext())
-                .getSessionManager();
-        sessionManager.removeSessionManagerListener(mSessionManagerListener,
-            CastSession.class);
+        try {
+          SessionManager sessionManager =
+              CastContext.getSharedInstance(getReactApplicationContext())
+                  .getSessionManager();
+          sessionManager.removeSessionManagerListener(mSessionManagerListener,
+              CastSession.class);
+        } catch (RuntimeException e) {
+        }
       }
     });
   }
